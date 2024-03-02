@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -14,7 +14,10 @@ namespace Assets.Codebase.GameElements
         [Header("Rocks")]
         [SerializeField] private List<Rock> _rockObjects;
         [SerializeField] private List<RectTransform> _rockInitialPositions;
+        [Header("Animation params")]
+        [SerializeField] private float _smashShakeStrength = 10f;
 
+        // Number of rocks in the pile
         private int _availableRocksCount;
 
         public event Action OnGameWon;
@@ -31,9 +34,13 @@ namespace Assets.Codebase.GameElements
             }
         }
 
+        /// <summary>
+        /// Sets elements to initial position
+        /// </summary>
+        /// <exception cref="System.Exception"></exception>
         private void ResetGameElements()
         {
-            _gemObject.transform.SetLocalPositionAndRotation(_gemInitialRect.position, _gemInitialRect.rotation);
+            _gemObject.transform.SetLocalPositionAndRotation(_gemInitialRect.localPosition, _gemInitialRect.localRotation);
 
 
             if (_rockObjects.Count > _rockInitialPositions.Count)
@@ -43,8 +50,9 @@ namespace Assets.Codebase.GameElements
 
             for (int i = 0; i < _rockObjects.Count; i++)
             {
+                _rockObjects[i].transform.localScale = Vector3.one;
                 _rockObjects[i].transform.position = _rockInitialPositions[i].position;
-                _rockObjects[i].transform.SetLocalPositionAndRotation(_rockInitialPositions[i].position, _rockInitialPositions[i].rotation);
+                _rockObjects[i].transform.SetLocalPositionAndRotation(_rockInitialPositions[i].localPosition, _rockInitialPositions[i].localRotation);
             }
         }
 
@@ -52,6 +60,7 @@ namespace Assets.Codebase.GameElements
         {
             if (_availableRocksCount > 0)
             {
+                ShakeField();
                 RemoveNextRock();
             }
             else
@@ -71,10 +80,29 @@ namespace Assets.Codebase.GameElements
             }
         }
 
+        private void ShakeField()
+        {
+            transform.DOShakeRotation(0.5f, _smashShakeStrength).SetEase(Ease.OutElastic);
+        }
+
         private void PlayWinAnimation()
         {
-            Debug.Log("Game Won!");
+            _gemObject.OnWinAnimationEnded += OnWinAnimationEnded;
+            _gemObject.WinParticles.Play();
+        }
+
+        private void OnWinAnimationEnded()
+        {
+            _gemObject.OnWinAnimationEnded -= OnWinAnimationEnded;
+            Debug.Log("Game won!");
             OnGameWon?.Invoke();
+        }
+
+        private void OnDisable()
+        {
+            // Reset rotation if closed during shake animation
+            DOTween.Kill(transform);
+            transform.rotation = Quaternion.identity;
         }
     }
 }

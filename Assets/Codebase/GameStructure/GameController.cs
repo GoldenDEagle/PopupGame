@@ -1,16 +1,18 @@
 using Assets.Codebase.GameElements;
-using Assets.Codebase.GameStructure;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Assets.Codebase
+namespace Assets.Codebase.GameStructure
 {
+    /// <summary>
+    /// Singleton, launching game and controlling its states
+    /// </summary>
     public class GameController : MonoBehaviour, IPointerClickHandler
     {
         public static GameController Instance { get; private set; }
 
-        [SerializeField] private GameView _gameWindow;
+        [SerializeField] private GameView _gameView;
 
         private GameState _state = GameState.Inactive;
         public GameState State => _state;
@@ -41,17 +43,12 @@ namespace Assets.Codebase
         {
             _state = newState;
             OnStateChanged?.Invoke(newState);
-            Debug.Log("Switched game state to: " + newState);
+            Debug.Log("Minigame state: " + newState);
         }
 
         private void OpenGame()
         {
-            _gameWindow.ShowGame();
-        }
-
-        private void CloseGame()
-        {
-            _gameWindow.HideGame();
+            _gameView.ShowGame();
         }
     }
 }
