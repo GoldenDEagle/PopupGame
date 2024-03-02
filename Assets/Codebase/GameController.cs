@@ -31,16 +31,9 @@ namespace Assets.Codebase
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            switch (_state)
+            if (_state == GameState.Inactive)
             {
-                case GameState.Inactive:
-                    OpenGame();
-                    break;
-                case GameState.Active:
-                    CloseGame();
-                    break;
-                case GameState.SwitchingState:
-                    break;
+                OpenGame();
             }
         }
 
@@ -53,13 +46,11 @@ namespace Assets.Codebase
 
         private void OpenGame()
         {
-            SwitchGameState(GameState.SwitchingState);
             _gameWindow.ShowGame();
         }
 
         private void CloseGame()
         {
-            SwitchGameState(GameState.SwitchingState);
             _gameWindow.HideGame();
         }
     }
